@@ -1,0 +1,2433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Commerce POS System</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --text-dark: #1f2937;
+            --text-light: #6b7280;
+            --bg-light: #f9fafb;
+            --bg-white: #ffffff;
+            --border-color: #e5e7eb;
+            --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            line-height: 1.6;
+            direction: ltr;
+        }
+
+        body.rtl {
+            direction: rtl;
+        }
+
+        /* Header Styles */
+        header {
+            background: var(--bg-white);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-secondary {
+            background: var(--bg-light);
+            color: var(--text-dark);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border-color);
+        }
+
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 0.35rem 0.75rem;
+            font-size: 0.85rem;
+        }
+
+        .cart-badge {
+            position: relative;
+        }
+
+        .cart-badge::after {
+            content: attr(data-count);
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--danger-color);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Auth Forms */
+        .auth-container {
+            max-width: 400px;
+            margin: 4rem auto;
+            background: var(--bg-white);
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .auth-container h2 {
+            margin-bottom: 1.5rem;
+            text-align: center;
+            color: var(--primary-color);
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.95rem;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .error-message {
+            color: var(--danger-color);
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+        }
+
+        .success-message {
+            color: var(--success-color);
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+        }
+
+        .auth-switch {
+            text-align: center;
+            margin-top: 1rem;
+            color: var(--text-light);
+        }
+
+        .auth-switch a {
+            color: var(--primary-color);
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        /* Products Grid */
+        .products-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .search-filter {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            flex: 1;
+        }
+
+        .search-filter input,
+        .search-filter select {
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.95rem;
+        }
+
+        .search-filter input {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .product-card {
+            background: var(--bg-white);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: transform 0.2s;
+        }
+
+        .product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background: var(--bg-light);
+        }
+
+        .product-info {
+            padding: 1rem;
+        }
+
+        .product-category {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-dark);
+        }
+
+        .product-description {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 1rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .product-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .product-price {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .stock-status {
+            font-size: 0.85rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+        }
+
+        .stock-status.in-stock {
+            background: #d1fae5;
+            color: var(--success-color);
+        }
+
+        .stock-status.low-stock {
+            background: #fef3c7;
+            color: var(--warning-color);
+        }
+
+        .stock-status.out-of-stock {
+            background: #fee2e2;
+            color: var(--danger-color);
+        }
+
+        /* Cart */
+        .cart-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .cart-items {
+            background: var(--bg-white);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .cart-item {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            align-items: center;
+        }
+
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+
+        .cart-item-image {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+
+        .cart-item-info {
+            flex: 1;
+        }
+
+        .cart-item-name {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .cart-item-price {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .cart-item-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 0.25rem;
+        }
+
+        .quantity-control button {
+            width: 30px;
+            height: 30px;
+            border: none;
+            background: var(--bg-light);
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .quantity-control span {
+            min-width: 30px;
+            text-align: center;
+        }
+
+        .cart-summary {
+            background: var(--bg-white);
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .summary-row:last-child {
+            border-bottom: none;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        /* Admin Dashboard */
+        .dashboard-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--bg-white);
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+        }
+
+        .stat-card h3 {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+        }
+
+        .stat-card .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .stat-card .stat-change {
+            font-size: 0.85rem;
+            color: var(--success-color);
+            margin-top: 0.5rem;
+        }
+
+        /* Tables */
+        .table-container {
+            background: var(--bg-white);
+            border-radius: 8px;
+            overflow-x: auto;
+            box-shadow: var(--shadow);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table th,
+        table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        table th {
+            background: var(--bg-light);
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        table tr:hover {
+            background: var(--bg-light);
+        }
+
+        .rtl table th,
+        .rtl table td {
+            text-align: right;
+        }
+
+        /* Charts */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-container {
+            background: var(--bg-white);
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+        }
+
+        .chart-container h3 {
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-white);
+            border-radius: 8px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 2rem;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h2 {
+            color: var(--primary-color);
+        }
+
+        .close-modal {
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-light);
+            background: none;
+            border: none;
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--border-color);
+            flex-wrap: wrap;
+        }
+
+        .nav-tab {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            border: none;
+            background: none;
+            color: var(--text-light);
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+        }
+
+        .nav-tab.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+
+        /* Utility Classes */
+        .hidden {
+            display: none !important;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .mt-1 { margin-top: 0.5rem; }
+        .mt-2 { margin-top: 1rem; }
+        .mb-1 { margin-bottom: 0.5rem; }
+        .mb-2 { margin-bottom: 1rem; }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-light);
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-container {
+                padding: 1rem;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            .products-grid {
+                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+                gap: 1rem;
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .cart-item {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .dashboard-stats {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 0.85rem;
+            }
+
+            table th,
+            table td {
+                padding: 0.5rem;
+            }
+        }
+
+        /* Checkout Form */
+        .checkout-container {
+            max-width: 800px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .checkout-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .checkout-form {
+            background: var(--bg-white);
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+        }
+
+        /* Order Success */
+        .order-success {
+            max-width: 600px;
+            margin: 4rem auto;
+            background: var(--bg-white);
+            padding: 3rem;
+            border-radius: 8px;
+            box-shadow: var(--shadow-lg);
+            text-align: center;
+        }
+
+        .order-success-icon {
+            font-size: 4rem;
+            color: var(--success-color);
+            margin-bottom: 1rem;
+        }
+
+        .order-success h2 {
+            color: var(--success-color);
+            margin-bottom: 1rem;
+        }
+
+        .order-id {
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            font-weight: bold;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-container">
+            <div class="logo" id="logo">E-Commerce POS</div>
+            <div class="header-actions">
+                <button class="btn btn-secondary" id="languageToggle">العربية</button>
+                <span id="userWelcome" class="hidden"></span>
+                <button class="btn btn-secondary hidden" id="cartBtn">
+                    <span class="cart-badge" data-count="0">🛒 <span id="cartText">Cart</span></span>
+                </button>
+                <button class="btn btn-secondary hidden" id="ordersBtn">📦 <span id="ordersText">My Orders</span></button>
+                <button class="btn btn-primary hidden" id="dashboardBtn">📊 <span id="dashboardText">Dashboard</span></button>
+                <button class="btn btn-danger hidden" id="logoutBtn">🚪 <span id="logoutText">Logout</span></button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div id="app">
+        <!-- Login Form -->
+        <div id="loginSection" class="auth-container">
+            <h2 id="loginTitle">Login</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label id="usernameLabel">Username</label>
+                    <input type="text" id="loginUsername" required>
+                </div>
+                <div class="form-group">
+                    <label id="passwordLabel">Password</label>
+                    <input type="password" id="loginPassword" required>
+                </div>
+                <div class="error-message" id="loginError"></div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;" id="loginSubmit">Login</button>
+            </form>
+            <div class="auth-switch">
+                <span id="noAccountText">Don't have an account?</span>
+                <a id="showRegister">Register</a>
+            </div>
+        </div>
+
+        <!-- Register Form -->
+        <div id="registerSection" class="auth-container hidden">
+            <h2 id="registerTitle">Register</h2>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label id="regUsernameLabel">Username</label>
+                    <input type="text" id="registerUsername" required minlength="3">
+                </div>
+                <div class="form-group">
+                    <label id="regPasswordLabel">Password</label>
+                    <input type="password" id="registerPassword" required minlength="6">
+                </div>
+                <div class="form-group">
+                    <label id="regEmailLabel">Email</label>
+                    <input type="email" id="registerEmail" required>
+                </div>
+                <div class="form-group">
+                    <label id="regPhoneLabel">Phone</label>
+                    <input type="tel" id="registerPhone" required>
+                </div>
+                <div class="error-message" id="registerError"></div>
+                <div class="success-message" id="registerSuccess"></div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;" id="registerSubmit">Register</button>
+            </form>
+            <div class="auth-switch">
+                <span id="haveAccountText">Already have an account?</span>
+                <a id="showLogin">Login</a>
+            </div>
+        </div>
+
+        <!-- Products Section (Customer) -->
+        <div id="productsSection" class="container hidden">
+            <div class="products-header">
+                <h1 id="productsTitle">Products</h1>
+                <div class="search-filter">
+                    <input type="text" id="searchInput" placeholder="Search products...">
+                    <select id="categoryFilter">
+                        <option value="">All Categories</option>
+                    </select>
+                </div>
+            </div>
+            <div class="products-grid" id="productsGrid"></div>
+        </div>
+
+        <!-- Cart Section -->
+        <div id="cartSection" class="container cart-container hidden">
+            <h1 id="cartTitle">Shopping Cart</h1>
+            <div class="cart-items" id="cartItems"></div>
+            <div class="cart-summary" id="cartSummary"></div>
+        </div>
+
+        <!-- Checkout Section -->
+        <div id="checkoutSection" class="container hidden">
+            <h1 id="checkoutTitle" class="mb-2">Checkout</h1>
+            <div class="checkout-container">
+                <div class="checkout-form">
+                    <h2 id="shippingTitle">Shipping Information</h2>
+                    <form id="checkoutForm">
+                        <div class="form-group">
+                            <label id="nameLabel">Full Name</label>
+                            <input type="text" id="checkoutName" required>
+                        </div>
+                        <div class="form-group">
+                            <label id="phoneLabel">Phone</label>
+                            <input type="tel" id="checkoutPhone" required>
+                        </div>
+                        <div class="form-group">
+                            <label id="addressLabel">Address</label>
+                            <textarea id="checkoutAddress" rows="3" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label id="paymentLabel">Payment Method</label>
+                            <select id="checkoutPayment" required>
+                                <option value="cash">Cash on Delivery</option>
+                                <option value="card">Credit Card</option>
+                                <option value="bank">Bank Transfer</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-success" style="width: 100%;" id="placeOrderBtn">Place Order</button>
+                    </form>
+                </div>
+                <div class="checkout-form">
+                    <h2 id="orderSummaryTitle">Order Summary</h2>
+                    <div id="checkoutSummary"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Success -->
+        <div id="orderSuccessSection" class="container hidden">
+            <div class="order-success">
+                <div class="order-success-icon">✓</div>
+                <h2 id="orderSuccessTitle">Order Placed Successfully!</h2>
+                <p id="orderSuccessMessage">Thank you for your order</p>
+                <div class="order-id" id="orderIdDisplay"></div>
+                <button class="btn btn-primary mt-2" id="continueShoppingBtn">Continue Shopping</button>
+            </div>
+        </div>
+
+        <!-- My Orders Section -->
+        <div id="ordersSection" class="container hidden">
+            <h1 id="myOrdersTitle">My Orders</h1>
+            <div id="ordersList"></div>
+        </div>
+
+        <!-- Admin Dashboard -->
+        <div id="adminSection" class="container hidden">
+            <div class="nav-tabs">
+                <button class="nav-tab active" data-tab="overview" id="overviewTab">Overview</button>
+                <button class="nav-tab" data-tab="products" id="productsTab">Products</button>
+                <button class="nav-tab" data-tab="orders" id="adminOrdersTab">Orders</button>
+                <button class="nav-tab" data-tab="analytics" id="analyticsTab">Analytics</button>
+            </div>
+
+            <!-- Overview Tab -->
+            <div id="overviewContent" class="tab-content">
+                <div class="dashboard-stats">
+                    <div class="stat-card">
+                        <h3 id="totalRevenueLabel">Total Revenue</h3>
+                        <div class="stat-value" id="totalRevenue">$0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="totalProfitLabel">Total Profit</h3>
+                        <div class="stat-value" id="totalProfit">$0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="totalOrdersLabel">Total Orders</h3>
+                        <div class="stat-value" id="totalOrders">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="itemsSoldLabel">Items Sold</h3>
+                        <div class="stat-value" id="itemsSold">0</div>
+                    </div>
+                </div>
+
+                <div class="charts-grid">
+                    <div class="chart-container">
+                        <h3 id="revenueChartTitle">Revenue Overview</h3>
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3 id="topProductsChartTitle">Top Products</h3>
+                        <canvas id="topProductsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Products Management Tab -->
+            <div id="productsContent" class="tab-content hidden">
+                <div class="products-header">
+                    <h2 id="productManagementTitle">Product Management</h2>
+                    <button class="btn btn-primary" id="addProductBtn">+ <span id="addProductText">Add Product</span></button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th id="idHeader">ID</th>
+                                <th id="imageHeader">Image</th>
+                                <th id="nameHeader">Name</th>
+                                <th id="categoryHeader">Category</th>
+                                <th id="priceHeader">Price</th>
+                                <th id="costHeader">Cost</th>
+                                <th id="stockHeader">Stock</th>
+                                <th id="soldHeader">Sold</th>
+                                <th id="actionsHeader">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productsTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Orders Tab -->
+            <div id="ordersContent" class="tab-content hidden">
+                <h2 id="orderManagementTitle">Order Management</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th id="orderIdHeader">Order ID</th>
+                                <th id="customerHeader">Customer</th>
+                                <th id="dateHeader">Date</th>
+                                <th id="itemsHeader">Items</th>
+                                <th id="totalHeader">Total</th>
+                                <th id="statusHeader">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Analytics Tab -->
+            <div id="analyticsContent" class="tab-content hidden">
+                <h2 id="analyticsTitle">Sales Analytics</h2>
+                <div class="charts-grid">
+                    <div class="chart-container">
+                        <h3 id="profitMarginTitle">Profit Margin Analysis</h3>
+                        <canvas id="profitChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3 id="salesTrendTitle">Sales Trend</h3>
+                        <canvas id="salesTrendChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3 id="categoryDistTitle">Category Distribution</h3>
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3 id="inventoryStatusTitle">Inventory Status</h3>
+                        <canvas id="inventoryChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Modal -->
+    <div id="productModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Add Product</h2>
+                <button class="close-modal" id="closeProductModal">×</button>
+            </div>
+            <form id="productForm">
+                <input type="hidden" id="productId">
+                <div class="form-group">
+                    <label id="productNameLabel">Product Name (English)</label>
+                    <input type="text" id="productName" required>
+                </div>
+                <div class="form-group">
+                    <label id="productNameArLabel">Product Name (Arabic)</label>
+                    <input type="text" id="productNameAr" required>
+                </div>
+                <div class="form-group">
+                    <label id="productDescLabel">Description (English)</label>
+                    <textarea id="productDesc" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label id="productDescArLabel">Description (Arabic)</label>
+                    <textarea id="productDescAr" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label id="productCategoryLabel">Category</label>
+                    <select id="productCategory" required>
+                        <option value="Electronics">Electronics</option>
+                        <option value="Fashion">Fashion</option>
+                        <option value="Home">Home</option>
+                        <option value="Books">Books</option>
+                        <option value="Sports">Sports</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label id="productPriceLabel">Price ($)</label>
+                    <input type="number" id="productPrice" step="0.01" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label id="productCostLabel">Cost Price ($)</label>
+                    <input type="number" id="productCost" step="0.01" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label id="productStockLabel">Stock Quantity</label>
+                    <input type="number" id="productStock" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label id="productImageLabel">Image URL</label>
+                    <input type="url" id="productImage" required>
+                </div>
+                <button type="submit" class="btn btn-success" style="width: 100%;" id="saveProductBtn">Save Product</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // ============= DATA MODELS =============
+        
+        // Application State
+        const state = {
+            currentUser: null,
+            currentLang: 'en',
+            cart: [],
+            products: [],
+            orders: [],
+            users: [
+                {
+                    username: 'admin',
+                    password: 'admin123',
+                    role: 'admin',
+                    email: 'admin@ecommerce.com',
+                    phone: '+1234567890'
+                }
+            ]
+        };
+
+        // Local Storage Keys
+        const STORAGE_KEYS = {
+            USERS: 'ecom_users_v1',
+            PRODUCTS: 'ecom_products_v1',
+            ORDERS: 'ecom_orders_v1',
+            CARTS: 'ecom_carts_v1', // store carts per username
+            SESSION: 'ecom_session_v1',
+            LANG: 'ecom_lang_v1'
+        };
+
+        // ============= STORAGE HELPERS =============
+        function saveToStorage(key, value) {
+            try {
+                localStorage.setItem(key, JSON.stringify(value));
+            } catch (e) {
+                console.warn('Storage save failed', e);
+            }
+        }
+
+        function loadFromStorage(key, fallback) {
+            try {
+                const raw = localStorage.getItem(key);
+                return raw ? JSON.parse(raw) : fallback;
+            } catch (e) {
+                console.warn('Storage load failed', e);
+                return fallback;
+            }
+        }
+
+        function persistAll() {
+            saveToStorage(STORAGE_KEYS.USERS, state.users);
+            saveToStorage(STORAGE_KEYS.PRODUCTS, state.products);
+            saveToStorage(STORAGE_KEYS.ORDERS, state.orders);
+            // save carts map: key -> username, value -> cart array
+            saveToStorage(STORAGE_KEYS.CARTS, state._carts || {});
+            saveToStorage(STORAGE_KEYS.LANG, state.currentLang);
+            saveToStorage(STORAGE_KEYS.SESSION, state.currentUser || null);
+        }
+
+        function loadAll() {
+            const users = loadFromStorage(STORAGE_KEYS.USERS, null);
+            if (users) state.users = users;
+
+            const products = loadFromStorage(STORAGE_KEYS.PRODUCTS, null);
+            if (products) state.products = products;
+
+            const orders = loadFromStorage(STORAGE_KEYS.ORDERS, null);
+            if (orders) state.orders = orders;
+
+            state._carts = loadFromStorage(STORAGE_KEYS.CARTS, {});
+
+            const lang = loadFromStorage(STORAGE_KEYS.LANG, null);
+            if (lang) state.currentLang = lang;
+
+            const session = loadFromStorage(STORAGE_KEYS.SESSION, null);
+            if (session) state.currentUser = session;
+        }
+
+        // Translation Object
+        const translations = {
+            en: {
+                logo: 'E-Commerce POS',
+                cart: 'Cart',
+                myOrders: 'My Orders',
+                dashboard: 'Dashboard',
+                logout: 'Logout',
+                login: 'Login',
+                register: 'Register',
+                username: 'Username',
+                password: 'Password',
+                email: 'Email',
+                phone: 'Phone',
+                noAccount: "Don't have an account?",
+                haveAccount: 'Already have an account?',
+                products: 'Products',
+                searchPlaceholder: 'Search products...',
+                allCategories: 'All Categories',
+                addToCart: 'Add to Cart',
+                shoppingCart: 'Shopping Cart',
+                subtotal: 'Subtotal',
+                total: 'Total',
+                proceedCheckout: 'Proceed to Checkout',
+                continueShopping: 'Continue Shopping',
+                checkout: 'Checkout',
+                shippingInfo: 'Shipping Information',
+                fullName: 'Full Name',
+                address: 'Address',
+                paymentMethod: 'Payment Method',
+                cash: 'Cash on Delivery',
+                card: 'Credit Card',
+                bank: 'Bank Transfer',
+                placeOrder: 'Place Order',
+                orderSummary: 'Order Summary',
+                orderSuccess: 'Order Placed Successfully!',
+                thankYou: 'Thank you for your order',
+                orderId: 'Order ID',
+                overview: 'Overview',
+                productsTab: 'Products',
+                ordersTab: 'Orders',
+                analytics: 'Analytics',
+                totalRevenue: 'Total Revenue',
+                totalProfit: 'Total Profit',
+                totalOrders: 'Total Orders',
+                itemsSold: 'Items Sold',
+                productManagement: 'Product Management',
+                addProduct: 'Add Product',
+                id: 'ID',
+                image: 'Image',
+                name: 'Name',
+                category: 'Category',
+                price: 'Price',
+                cost: 'Cost',
+                stock: 'Stock',
+                sold: 'Sold',
+                actions: 'Actions',
+                edit: 'Edit',
+                delete: 'Delete',
+                orderManagement: 'Order Management',
+                customer: 'Customer',
+                date: 'Date',
+                items: 'Items',
+                status: 'Status',
+                salesAnalytics: 'Sales Analytics',
+                revenueOverview: 'Revenue Overview',
+                topProducts: 'Top Products',
+                profitMargin: 'Profit Margin Analysis',
+                salesTrend: 'Sales Trend',
+                categoryDist: 'Category Distribution',
+                inventoryStatus: 'Inventory Status',
+                productName: 'Product Name (English)',
+                productNameAr: 'Product Name (Arabic)',
+                description: 'Description (English)',
+                descriptionAr: 'Description (Arabic)',
+                costPrice: 'Cost Price ($)',
+                stockQty: 'Stock Quantity',
+                imageUrl: 'Image URL',
+                saveProduct: 'Save Product',
+                emptyCart: 'Your cart is empty',
+                noOrders: 'No orders yet',
+                inStock: 'In Stock',
+                lowStock: 'Low Stock',
+                outOfStock: 'Out of Stock',
+                remove: 'Remove',
+                welcome: 'Welcome'
+            },
+            ar: {
+                logo: 'نظام نقاط البيع التجاري',
+                cart: 'السلة',
+                myOrders: 'طلباتي',
+                dashboard: 'لوحة التحكم',
+                logout: 'تسجيل الخروج',
+                login: 'تسجيل الدخول',
+                register: 'إنشاء حساب',
+                username: 'اسم المستخدم',
+                password: 'كلمة المرور',
+                email: 'البريد الإلكتروني',
+                phone: 'الهاتف',
+                noAccount: 'ليس لديك حساب؟',
+                haveAccount: 'لديك حساب بالفعل؟',
+                products: 'المنتجات',
+                searchPlaceholder: 'البحث عن منتجات...',
+                allCategories: 'جميع الفئات',
+                addToCart: 'أضف للسلة',
+                shoppingCart: 'سلة التسوق',
+                subtotal: 'المجموع الفرعي',
+                total: 'الإجمالي',
+                proceedCheckout: 'إتمام الطلب',
+                continueShopping: 'متابعة التسوق',
+                checkout: 'إتمام الطلب',
+                shippingInfo: 'معلومات الشحن',
+                fullName: 'الاسم الكامل',
+                address: 'العنوان',
+                paymentMethod: 'طريقة الدفع',
+                cash: 'الدفع عند الاستلام',
+                card: 'بطاقة ائتمان',
+                bank: 'تحويل بنكي',
+                placeOrder: 'تأكيد الطلب',
+                orderSummary: 'ملخص الطلب',
+                orderSuccess: 'تم تقديم الطلب بنجاح!',
+                thankYou: 'شكراً لطلبك',
+                orderId: 'رقم الطلب',
+                overview: 'نظرة عامة',
+                productsTab: 'المنتجات',
+                ordersTab: 'الطلبات',
+                analytics: 'التحليلات',
+                totalRevenue: 'إجمالي الإيرادات',
+                totalProfit: 'إجمالي الأرباح',
+                totalOrders: 'إجمالي الطلبات',
+                itemsSold: 'العناصر المباعة',
+                productManagement: 'إدارة المنتجات',
+                addProduct: 'إضافة منتج',
+                id: 'الرقم',
+                image: 'الصورة',
+                name: 'الاسم',
+                category: 'الفئة',
+                price: 'السعر',
+                cost: 'التكلفة',
+                stock: 'المخزون',
+                sold: 'المباع',
+                actions: 'الإجراءات',
+                edit: 'تعديل',
+                delete: 'حذف',
+                orderManagement: 'إدارة الطلبات',
+                customer: 'العميل',
+                date: 'التاريخ',
+                items: 'العناصر',
+                status: 'الحالة',
+                salesAnalytics: 'تحليلات المبيعات',
+                revenueOverview: 'نظرة عامة على الإيرادات',
+                topProducts: 'المنتجات الأكثر مبيعاً',
+                profitMargin: 'تحليل هامش الربح',
+                salesTrend: 'اتجاه المبيعات',
+                categoryDist: 'توزيع الفئات',
+                inventoryStatus: 'حالة المخزون',
+                productName: 'اسم المنتج (إنجليزي)',
+                productNameAr: 'اسم المنتج (عربي)',
+                description: 'الوصف (إنجليزي)',
+                descriptionAr: 'الوصف (عربي)',
+                costPrice: 'سعر التكلفة ($)',
+                stockQty: 'كمية المخزون',
+                imageUrl: 'رابط الصورة',
+                saveProduct: 'حفظ المنتج',
+                emptyCart: 'سلة التسوق فارغة',
+                noOrders: 'لا توجد طلبات بعد',
+                inStock: 'متوفر',
+                lowStock: 'مخزون منخفض',
+                outOfStock: 'غير متوفر',
+                remove: 'إزالة',
+                welcome: 'مرحباً'
+            }
+        };
+
+        // Sample Products Data
+        state.products = [
+            {
+                id: 1,
+                name: 'Wireless Headphones',
+                nameAr: 'سماعات لاسلكية',
+                description: 'High-quality wireless headphones with noise cancellation',
+                descriptionAr: 'سماعات لاسلكية عالية الجودة مع إلغاء الضوضاء',
+                category: 'Electronics',
+                price: 79.99,
+                cost: 40.00,
+                stock: 50,
+                sold: 23,
+                image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=300&fit=crop'
+            },
+            {
+                id: 2,
+                name: 'Smart Watch',
+                nameAr: 'ساعة ذكية',
+                description: 'Fitness tracking smartwatch with heart rate monitor',
+                descriptionAr: 'ساعة ذكية لتتبع اللياقة مع مراقب معدل ضربات القلب',
+                category: 'Electronics',
+                price: 199.99,
+                cost: 120.00,
+                stock: 30,
+                sold: 15,
+                image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop'
+            },
+            {
+                id: 3,
+                name: 'Running Shoes',
+                nameAr: 'حذاء رياضي',
+                description: 'Comfortable running shoes for daily exercise',
+                descriptionAr: 'حذاء رياضي مريح للتمارين اليومية',
+                category: 'Sports',
+                price: 89.99,
+                cost: 45.00,
+                stock: 100,
+                sold: 67,
+                image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop'
+            },
+            {
+                id: 4,
+                name: 'Leather Jacket',
+                nameAr: 'سترة جلدية',
+                description: 'Premium leather jacket for all seasons',
+                descriptionAr: 'سترة جلدية فاخرة لجميع الفصول',
+                category: 'Fashion',
+                price: 249.99,
+                cost: 150.00,
+                stock: 25,
+                sold: 12,
+                image: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400&h=300&fit=crop'
+            },
+            {
+                id: 5,
+                name: 'Coffee Maker',
+                nameAr: 'صانعة قهوة',
+                description: 'Automatic coffee maker with timer',
+                descriptionAr: 'صانعة قهوة أوتوماتيكية مع مؤقت',
+                category: 'Home',
+                price: 129.99,
+                cost: 70.00,
+                stock: 40,
+                sold: 28,
+                image: 'https://images.unsplash.com/photo-1517668808822-9ebb02f2a0e6?w=400&h=300&fit=crop'
+            },
+            {
+                id: 6,
+                name: 'Programming Book',
+                nameAr: 'كتاب برمجة',
+                description: 'Complete guide to JavaScript programming',
+                descriptionAr: 'دليل شامل لبرمجة جافاسكريبت',
+                category: 'Books',
+                price: 39.99,
+                cost: 15.00,
+                stock: 80,
+                sold: 45,
+                image: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&h=300&fit=crop'
+            },
+            {
+                id: 7,
+                name: 'Yoga Mat',
+                nameAr: 'سجادة يوغا',
+                description: 'Non-slip yoga mat for fitness and meditation',
+                descriptionAr: 'سجادة يوغا غير قابلة للانزلاق للياقة والتأمل',
+                category: 'Sports',
+                price: 29.99,
+                cost: 12.00,
+                stock: 150,
+                sold: 89,
+                image: 'https://images.unsplash.com/photo-1601925260368-ae2f83cf8b7f?w=400&h=300&fit=crop'
+            },
+            {
+                id: 8,
+                name: 'Bluetooth Speaker',
+                nameAr: 'مكبر صوت بلوتوث',
+                description: 'Portable Bluetooth speaker with powerful bass',
+                descriptionAr: 'مكبر صوت بلوتوث محمول مع صوت جهير قوي',
+                category: 'Electronics',
+                price: 59.99,
+                cost: 30.00,
+                stock: 60,
+                sold: 34,
+                image: 'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=400&h=300&fit=crop'
+            },
+            {
+                id: 9,
+                name: 'Designer Handbag',
+                nameAr: 'حقيبة يد مصممة',
+                description: 'Elegant designer handbag for special occasions',
+                descriptionAr: 'حقيبة يد أنيقة للمناسبات الخاصة',
+                category: 'Fashion',
+                price: 299.99,
+                cost: 180.00,
+                stock: 20,
+                sold: 8,
+                image: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=400&h=300&fit=crop'
+            },
+            {
+                id: 10,
+                name: 'Table Lamp',
+                nameAr: 'مصباح طاولة',
+                description: 'Modern LED table lamp with adjustable brightness',
+                descriptionAr: 'مصباح طاولة LED حديث مع سطوع قابل للتعديل',
+                category: 'Home',
+                price: 49.99,
+                cost: 25.00,
+                stock: 70,
+                sold: 42,
+                image: 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=400&h=300&fit=crop'
+            },
+            {
+                id: 11,
+                name: 'Cookbook Collection',
+                nameAr: 'مجموعة كتب طبخ',
+                description: 'Collection of international cooking recipes',
+                descriptionAr: 'مجموعة من وصفات الطبخ العالمية',
+                category: 'Books',
+                price: 59.99,
+                cost: 25.00,
+                stock: 45,
+                sold: 18,
+                image: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400&h=300&fit=crop'
+            },
+            {
+                id: 12,
+                name: 'Dumbbell Set',
+                nameAr: 'طقم دمبل',
+                description: 'Adjustable dumbbell set for home workouts',
+                descriptionAr: 'طقم دمبل قابل للتعديل للتمارين المنزلية',
+                category: 'Sports',
+                price: 149.99,
+                cost: 80.00,
+                stock: 35,
+                sold: 21,
+                image: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=400&h=300&fit=crop'
+            },
+            {
+                id: 13,
+                name: 'Wireless Mouse',
+                nameAr: 'فأرة لاسلكية',
+                description: 'Ergonomic wireless mouse for comfortable computing',
+                descriptionAr: 'فأرة لاسلكية مريحة للاستخدام المريح',
+                category: 'Electronics',
+                price: 24.99,
+                cost: 10.00,
+                stock: 200,
+                sold: 156,
+                image: 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=400&h=300&fit=crop'
+            },
+            {
+                id: 14,
+                name: 'Ceramic Vase',
+                nameAr: 'مزهرية سيراميك',
+                description: 'Handcrafted ceramic vase for home decoration',
+                descriptionAr: 'مزهرية سيراميك مصنوعة يدوياً للديكور المنزلي',
+                category: 'Home',
+                price: 34.99,
+                cost: 15.00,
+                stock: 55,
+                sold: 29,
+                image: 'https://images.unsplash.com/photo-1578500494198-246f612d3b3d?w=400&h=300&fit=crop'
+            },
+            {
+                id: 15,
+                name: 'Sunglasses',
+                nameAr: 'نظارات شمسية',
+                description: 'UV protection sunglasses with polarized lenses',
+                descriptionAr: 'نظارات شمسية بحماية من الأشعة فوق البنفسجية',
+                category: 'Fashion',
+                price: 119.99,
+                cost: 60.00,
+                stock: 75,
+                sold: 38,
+                image: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=400&h=300&fit=crop'
+            }
+        ];
+
+        // ============= HELPER FUNCTIONS =============
+
+        function t(key) {
+            return translations[state.currentLang][key] || key;
+        }
+
+        function formatPrice(price) {
+            return `$${price.toFixed(2)}`;
+        }
+
+        function generateOrderId() {
+            return 'ORD-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+        }
+
+        function getStockStatus(stock) {
+            if (stock === 0) return { class: 'out-of-stock', text: t('outOfStock') };
+            if (stock < 10) return { class: 'low-stock', text: t('lowStock') };
+            return { class: 'in-stock', text: t('inStock') };
+        }
+
+        function updateCartBadge() {
+            const cartCount = state.cart.reduce((sum, item) => sum + item.quantity, 0);
+            const badge = document.querySelector('.cart-badge');
+            if (badge) {
+                badge.setAttribute('data-count', cartCount);
+            }
+            const cartBtn = document.getElementById('cartBtn');
+            if (cartBtn) {
+                // show/hide based on login in updateUIForUser; here update text
+                const cartText = document.getElementById('cartText');
+                if (cartText) cartText.textContent = `${t('cart')} (${cartCount})`;
+            }
+        }
+
+        function showSection(sectionId) {
+            const sections = ['loginSection', 'registerSection', 'productsSection', 'cartSection', 
+                             'checkoutSection', 'orderSuccessSection', 'ordersSection', 'adminSection'];
+            sections.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.classList.toggle('hidden', id !== sectionId);
+                }
+            });
+        }
+
+        function updateUIForUser() {
+            const isLoggedIn = !!state.currentUser;
+            const isAdmin = state.currentUser?.role === 'admin';
+
+            document.getElementById('userWelcome').textContent = isLoggedIn ? 
+                `${t('welcome')}, ${state.currentUser.username}` : '';
+            document.getElementById('userWelcome').classList.toggle('hidden', !isLoggedIn);
+            
+            document.getElementById('cartBtn').classList.toggle('hidden', !isLoggedIn || isAdmin);
+            document.getElementById('ordersBtn').classList.toggle('hidden', !isLoggedIn || isAdmin);
+            document.getElementById('dashboardBtn').classList.toggle('hidden', !isAdmin);
+            document.getElementById('logoutBtn').classList.toggle('hidden', !isLoggedIn);
+
+            if (isLoggedIn) {
+                if (isAdmin) {
+                    showSection('adminSection');
+                    renderAdminDashboard();
+                } else {
+                    showSection('productsSection');
+                    renderProducts();
+                }
+            } else {
+                showSection('loginSection');
+            }
+        }
+
+        function toggleLanguage() {
+            state.currentLang = state.currentLang === 'en' ? 'ar' : 'en';
+            document.body.classList.toggle('rtl', state.currentLang === 'ar');
+            updateAllTexts();
+            // persist language
+            saveToStorage(STORAGE_KEYS.LANG, state.currentLang);
+            
+            // Re-render current view
+            if (state.currentUser) {
+                if (state.currentUser.role === 'admin') {
+                    renderAdminDashboard();
+                } else {
+                    renderProducts();
+                }
+            }
+        }
+
+        function updateAllTexts() {
+            // Header
+            document.getElementById('logo').textContent = t('logo');
+            document.getElementById('languageToggle').textContent = state.currentLang === 'en' ? 'العربية' : 'English';
+            document.getElementById('cartText').textContent = t('cart');
+            document.getElementById('ordersText').textContent = t('myOrders');
+            document.getElementById('dashboardText').textContent = t('dashboard');
+            document.getElementById('logoutText').textContent = t('logout');
+
+            // Auth forms
+            document.getElementById('loginTitle').textContent = t('login');
+            document.getElementById('usernameLabel').textContent = t('username');
+            document.getElementById('passwordLabel').textContent = t('password');
+            document.getElementById('loginSubmit').textContent = t('login');
+            document.getElementById('noAccountText').textContent = t('noAccount');
+            document.getElementById('showRegister').textContent = t('register');
+
+            document.getElementById('registerTitle').textContent = t('register');
+            document.getElementById('regUsernameLabel').textContent = t('username');
+            document.getElementById('regPasswordLabel').textContent = t('password');
+            document.getElementById('regEmailLabel').textContent = t('email');
+            document.getElementById('regPhoneLabel').textContent = t('phone');
+            document.getElementById('registerSubmit').textContent = t('register');
+            document.getElementById('haveAccountText').textContent = t('haveAccount');
+            document.getElementById('showLogin').textContent = t('login');
+
+            // Products
+            document.getElementById('productsTitle').textContent = t('products');
+            document.getElementById('searchInput').placeholder = t('searchPlaceholder');
+
+            // Cart
+            document.getElementById('cartTitle').textContent = t('shoppingCart');
+
+            // Checkout
+            document.getElementById('checkoutTitle').textContent = t('checkout');
+            document.getElementById('shippingTitle').textContent = t('shippingInfo');
+            document.getElementById('nameLabel').textContent = t('fullName');
+            document.getElementById('phoneLabel').textContent = t('phone');
+            document.getElementById('addressLabel').textContent = t('address');
+            document.getElementById('paymentLabel').textContent = t('paymentMethod');
+            document.getElementById('placeOrderBtn').textContent = t('placeOrder');
+            document.getElementById('orderSummaryTitle').textContent = t('orderSummary');
+
+            // Order success
+            document.getElementById('orderSuccessTitle').textContent = t('orderSuccess');
+            document.getElementById('orderSuccessMessage').textContent = t('thankYou');
+            document.getElementById('continueShoppingBtn').textContent = t('continueShopping');
+
+            // My Orders
+            document.getElementById('myOrdersTitle').textContent = t('myOrders');
+
+            // Admin tabs
+            document.getElementById('overviewTab').textContent = t('overview');
+            document.getElementById('productsTab').textContent = t('productsTab');
+            document.getElementById('adminOrdersTab').textContent = t('ordersTab');
+            document.getElementById('analyticsTab').textContent = t('analytics');
+
+            // Admin stats
+            document.getElementById('totalRevenueLabel').textContent = t('totalRevenue');
+            document.getElementById('totalProfitLabel').textContent = t('totalProfit');
+            document.getElementById('totalOrdersLabel').textContent = t('totalOrders');
+            document.getElementById('itemsSoldLabel').textContent = t('itemsSold');
+
+            // Admin sections
+            document.getElementById('productManagementTitle').textContent = t('productManagement');
+            document.getElementById('addProductText').textContent = t('addProduct');
+            document.getElementById('orderManagementTitle').textContent = t('orderManagement');
+            document.getElementById('analyticsTitle').textContent = t('salesAnalytics');
+
+            // Table headers
+            document.getElementById('idHeader').textContent = t('id');
+            document.getElementById('imageHeader').textContent = t('image');
+            document.getElementById('nameHeader').textContent = t('name');
+            document.getElementById('categoryHeader').textContent = t('category');
+            document.getElementById('priceHeader').textContent = t('price');
+            document.getElementById('costHeader').textContent = t('cost');
+            document.getElementById('stockHeader').textContent = t('stock');
+            document.getElementById('soldHeader').textContent = t('sold');
+            document.getElementById('actionsHeader').textContent = t('actions');
+
+            document.getElementById('orderIdHeader').textContent = t('orderId');
+            document.getElementById('customerHeader').textContent = t('customer');
+            document.getElementById('dateHeader').textContent = t('date');
+            document.getElementById('itemsHeader').textContent = t('items');
+            document.getElementById('totalHeader').textContent = t('total');
+            document.getElementById('statusHeader').textContent = t('status');
+
+            // Chart titles
+            document.getElementById('revenueChartTitle').textContent = t('revenueOverview');
+            document.getElementById('topProductsChartTitle').textContent = t('topProducts');
+            document.getElementById('profitMarginTitle').textContent = t('profitMargin');
+            document.getElementById('salesTrendTitle').textContent = t('salesTrend');
+            document.getElementById('categoryDistTitle').textContent = t('categoryDist');
+            document.getElementById('inventoryStatusTitle').textContent = t('inventoryStatus');
+
+            // Product form
+            document.getElementById('modalTitle').textContent = t('addProduct');
+            document.getElementById('productNameLabel').textContent = t('productName');
+            document.getElementById('productNameArLabel').textContent = t('productNameAr');
+            document.getElementById('productDescLabel').textContent = t('description');
+            document.getElementById('productDescArLabel').textContent = t('descriptionAr');
+            document.getElementById('productCategoryLabel').textContent = t('category');
+            document.getElementById('productPriceLabel').textContent = t('price');
+            document.getElementById('productCostLabel').textContent = t('costPrice');
+            document.getElementById('productStockLabel').textContent = t('stockQty');
+            document.getElementById('productImageLabel').textContent = t('imageUrl');
+            document.getElementById('saveProductBtn').textContent = t('saveProduct');
+        }
+
+        // ============= RENDER FUNCTIONS =============
+
+        function renderProducts() {
+            const grid = document.getElementById('productsGrid');
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const categoryFilter = document.getElementById('categoryFilter').value;
+
+            const filtered = state.products.filter(product => {
+                const matchesSearch = product.name.toLowerCase().includes(searchTerm) || 
+                                     product.nameAr.includes(searchTerm);
+                const matchesCategory = !categoryFilter || product.category === categoryFilter;
+                return matchesSearch && matchesCategory;
+            });
+
+            grid.innerHTML = filtered.map(product => {
+                const stockStatus = getStockStatus(product.stock);
+                const name = state.currentLang === 'ar' ? product.nameAr : product.name;
+                const desc = state.currentLang === 'ar' ? product.descriptionAr : product.description;
+
+                return `
+                    <div class="product-card">
+                        <img src="${product.image}" alt="${name}" class="product-image">
+                        <div class="product-info">
+                            <div class="product-category">${product.category}</div>
+                            <div class="product-name">${name}</div>
+                            <div class="product-description">${desc}</div>
+                            <div class="product-footer">
+                                <div class="product-price">${formatPrice(product.price)}</div>
+                                <div class="stock-status ${stockStatus.class}">${stockStatus.text}</div>
+                            </div>
+                            <button class="btn btn-primary" style="width: 100%; margin-top: 1rem;" 
+                                    onclick="addToCart(${product.id})"
+                                    ${product.stock === 0 ? 'disabled' : ''}>
+                                ${t('addToCart')}
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Update category filter
+            const categories = [...new Set(state.products.map(p => p.category))];
+            const categorySelect = document.getElementById('categoryFilter');
+            categorySelect.innerHTML = `<option value="">${t('allCategories')}</option>` +
+                categories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+        }
+
+        function renderCart() {
+            const cartItems = document.getElementById('cartItems');
+            const cartSummary = document.getElementById('cartSummary');
+
+            if (state.cart.length === 0) {
+                cartItems.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🛒</div>
+                        <h2>${t('emptyCart')}</h2>
+                        <button class="btn btn-primary mt-2" onclick="showSection('productsSection'); renderProducts();">
+                            ${t('continueShopping')}
+                        </button>
+                    </div>
+                `;
+                cartSummary.innerHTML = '';
+                return;
+            }
+
+            cartItems.innerHTML = state.cart.map(item => {
+                const product = state.products.find(p => p.id === item.productId);
+                const name = state.currentLang === 'ar' ? product.nameAr : product.name;
+
+                return `
+                    <div class="cart-item">
+                        <img src="${product.image}" alt="${name}" class="cart-item-image">
+                        <div class="cart-item-info">
+                            <div class="cart-item-name">${name}</div>
+                            <div class="cart-item-price">${formatPrice(product.price)} × ${item.quantity}</div>
+                        </div>
+                        <div class="cart-item-actions">
+                            <div class="quantity-control">
+                                <button onclick="updateCartQuantity(${product.id}, -1)">-</button>
+                                <span>${item.quantity}</span>
+                                <button onclick="updateCartQuantity(${product.id}, 1)">+</button>
+                            </div>
+                            <button class="btn btn-danger btn-sm" onclick="removeFromCart(${product.id})">
+                                ${t('remove')}
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            const subtotal = state.cart.reduce((sum, item) => {
+                const product = state.products.find(p => p.id === item.productId);
+                return sum + (product.price * item.quantity);
+            }, 0);
+
+            cartSummary.innerHTML = `
+                <div class="summary-row">
+                    <span>${t('subtotal')}</span>
+                    <span>${formatPrice(subtotal)}</span>
+                </div>
+                <div class="summary-row">
+                    <span>${t('total')}</span>
+                    <span>${formatPrice(subtotal)}</span>
+                </div>
+                <button class="btn btn-success" style="width: 100%; margin-top: 1rem;" onclick="goToCheckout()">
+                    ${t('proceedCheckout')}
+                </button>
+                <button class="btn btn-secondary" style="width: 100%; margin-top: 0.5rem;" 
+                        onclick="showSection('productsSection'); renderProducts();">
+                    ${t('continueShopping')}
+                </button>
+            `;
+        }
+
+        function renderCheckout() {
+            const checkoutSummary = document.getElementById('checkoutSummary');
+            
+            const items = state.cart.map(item => {
+                const product = state.products.find(p => p.id === item.productId);
+                const name = state.currentLang === 'ar' ? product.nameAr : product.name;
+                return `
+                    <div class="summary-row">
+                        <span>${name} × ${item.quantity}</span>
+                        <span>${formatPrice(product.price * item.quantity)}</span>
+                    </div>
+                `;
+            }).join('');
+
+            const total = state.cart.reduce((sum, item) => {
+                const product = state.products.find(p => p.id === item.productId);
+                return sum + (product.price * item.quantity);
+            }, 0);
+
+            checkoutSummary.innerHTML = `
+                ${items}
+                <div class="summary-row">
+                    <span>${t('total')}</span>
+                    <span>${formatPrice(total)}</span>
+                </div>
+            `;
+        }
+
+        function renderMyOrders() {
+            const ordersList = document.getElementById('ordersList');
+            const userOrders = state.orders.filter(order => order.userId === state.currentUser.username);
+
+            if (userOrders.length === 0) {
+                ordersList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📦</div>
+                        <h2>${t('noOrders')}</h2>
+                    </div>
+                `;
+                return;
+            }
+
+            ordersList.innerHTML = userOrders.map(order => {
+                const items = order.items.map(item => {
+                    const product = state.products.find(p => p.id === item.productId);
+                    const name = state.currentLang === 'ar' ? product?.nameAr : product?.name;
+                    return `<li>${name} × ${item.quantity}</li>`;
+                }).join('');
+
+                return `
+                    <div class="cart-items" style="margin-bottom: 1rem;">
+                        <h3>${t('orderId')}: ${order.id}</h3>
+                        <p>${t('date')}: ${new Date(order.date).toLocaleDateString()}</p>
+                        <p>${t('total')}: ${formatPrice(order.total)}</p>
+                        <p>${t('status')}: ${order.status}</p>
+                        <h4>${t('items')}:</h4>
+                        <ul>${items}</ul>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderAdminDashboard() {
+            calculateStats();
+            renderProductsTable();
+            renderOrdersTable();
+            renderCharts();
+        }
+
+        function calculateStats() {
+            const totalRevenue = state.orders.reduce((sum, order) => sum + order.total, 0);
+            const totalCost = state.orders.reduce((sum, order) => {
+                return sum + order.items.reduce((itemSum, item) => {
+                    const product = state.products.find(p => p.id === item.productId);
+                    return itemSum + (product?.cost || 0) * item.quantity;
+                }, 0);
+            }, 0);
+            const totalProfit = totalRevenue - totalCost;
+            const totalOrders = state.orders.length;
+            const itemsSold = state.products.reduce((sum, product) => sum + product.sold, 0);
+
+            document.getElementById('totalRevenue').textContent = formatPrice(totalRevenue);
+            document.getElementById('totalProfit').textContent = formatPrice(totalProfit);
+            document.getElementById('totalOrders').textContent = totalOrders;
+            document.getElementById('itemsSold').textContent = itemsSold;
+        }
+
+        function renderProductsTable() {
+            const tbody = document.getElementById('productsTableBody');
+            tbody.innerHTML = state.products.map(product => `
+                <tr>
+                    <td>${product.id}</td>
+                    <td><img src="${product.image}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;"></td>
+                    <td>${state.currentLang === 'ar' ? product.nameAr : product.name}</td>
+                    <td>${product.category}</td>
+                    <td>${formatPrice(product.price)}</td>
+                    <td>${formatPrice(product.cost)}</td>
+                    <td>${product.stock}</td>
+                    <td>${product.sold}</td>
+                    <td>
+                        <button class="btn btn-secondary btn-sm" onclick="editProduct(${product.id})">
+                            ${t('edit')}
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteProduct(${product.id})">
+                            ${t('delete')}
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderOrdersTable() {
+            const tbody = document.getElementById('ordersTableBody');
+            tbody.innerHTML = state.orders.map(order => `
+                <tr>
+                    <td>${order.id}</td>
+                    <td>${order.customerName}</td>
+                    <td>${new Date(order.date).toLocaleDateString()}</td>
+                    <td>${order.items.length}</td>
+                    <td>${formatPrice(order.total)}</td>
+                    <td><span class="stock-status in-stock">${order.status}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        let charts = {};
+
+        function renderCharts() {
+            // Destroy existing charts
+            Object.values(charts).forEach(chart => chart?.destroy());
+            charts = {};
+
+            // Revenue Chart
+            const revenueCtx = document.getElementById('revenueChart');
+            if (revenueCtx) {
+                const last7Days = Array.from({length: 7}, (_, i) => {
+                    const date = new Date();
+                    date.setDate(date.getDate() - (6 - i));
+                    return date.toLocaleDateString('en-US', {month: 'short', day: 'numeric'});
+                });
+
+                charts.revenue = new Chart(revenueCtx, {
+                    type: 'line',
+                    data: {
+                        labels: last7Days,
+                        datasets: [{
+                            label: t('totalRevenue'),
+                            data: Array.from({length: 7}, () => Math.random() * 1000 + 500),
+                            borderColor: '#2563eb',
+                            backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: { display: false }
+                        }
+                    }
+                });
+            }
+
+            // Top Products Chart
+            const topProductsCtx = document.getElementById('topProductsChart');
+            if (topProductsCtx) {
+                const topProducts = [...state.products]
+                    .sort((a, b) => b.sold - a.sold)
+                    .slice(0, 5);
+
+                charts.topProducts = new Chart(topProductsCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: topProducts.map(p => state.currentLang === 'ar' ? p.nameAr : p.name),
+                        datasets: [{
+                            label: t('sold'),
+                            data: topProducts.map(p => p.sold),
+                            backgroundColor: '#2563eb'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: { display: false }
+                        }
+                    }
+                });
+            }
+
+            // Profit Chart
+            const profitCtx = document.getElementById('profitChart');
+            if (profitCtx) {
+                const revenue = state.orders.reduce((sum, o) => sum + o.total, 0);
+                const cost = state.products.reduce((sum, p) => sum + (p.cost * p.sold), 0);
+
+                charts.profit = new Chart(profitCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: [t('totalRevenue'), t('cost'), t('totalProfit')],
+                        datasets: [{
+                            data: [revenue, cost, revenue - cost],
+                            backgroundColor: ['#2563eb', '#ef4444', '#10b981']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true
+                    }
+                });
+            }
+
+            // Sales Trend Chart
+            const salesTrendCtx = document.getElementById('salesTrendChart');
+            if (salesTrendCtx) {
+                charts.salesTrend = new Chart(salesTrendCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                        datasets: [{
+                            label: t('salesTrend'),
+                            data: [1200, 1900, 1500, 2100, 1800, 2400],
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: { display: false }
+                        }
+                    }
+                });
+            }
+
+            // Category Distribution Chart
+            const categoryCtx = document.getElementById('categoryChart');
+            if (categoryCtx) {
+                const categories = {};
+                state.products.forEach(p => {
+                    categories[p.category] = (categories[p.category] || 0) + p.sold;
+                });
+
+                charts.category = new Chart(categoryCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: Object.keys(categories),
+                        datasets: [{
+                            data: Object.values(categories),
+                            backgroundColor: ['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true
+                    }
+                });
+            }
+
+            // Inventory Status Chart
+            const inventoryCtx = document.getElementById('inventoryChart');
+            if (inventoryCtx) {
+                const inStock = state.products.filter(p => p.stock >= 10).length;
+                const lowStock = state.products.filter(p => p.stock > 0 && p.stock < 10).length;
+                const outOfStock = state.products.filter(p => p.stock === 0).length;
+
+                charts.inventory = new Chart(inventoryCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: [t('inStock'), t('lowStock'), t('outOfStock')],
+                        datasets: [{
+                            data: [inStock, lowStock, outOfStock],
+                            backgroundColor: ['#10b981', '#f59e0b', '#ef4444']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: { display: false }
+                        }
+                    }
+                });
+            }
+        }
+
+        // ============= EVENT HANDLERS =============
+
+        function addToCart(productId) {
+            const product = state.products.find(p => p.id === productId);
+            if (!product || product.stock === 0) return;
+
+            const existingItem = state.cart.find(item => item.productId === productId);
+            
+            if (existingItem) {
+                if (existingItem.quantity < product.stock) {
+                    existingItem.quantity++;
+                } else {
+                    alert(state.currentLang === 'ar' ? 'المخزون غير كافٍ' : 'Insufficient stock');
+                    return;
+                }
+            } else {
+                state.cart.push({ productId, quantity: 1 });
+            }
+
+            // Persist cart per user
+            state._carts = state._carts || {};
+            const username = state.currentUser?.username || '_guest';
+            state._carts[username] = state.cart;
+            saveToStorage(STORAGE_KEYS.CARTS, state._carts);
+
+            updateCartBadge();
+            renderCart();
+            alert(state.currentLang === 'ar' ? 'تمت الإضافة للسلة' : 'Added to cart');
+        }
+
+        function updateCartQuantity(productId, change) {
+            const product = state.products.find(p => p.id === productId);
+            const cartItem = state.cart.find(item => item.productId === productId);
+            
+            if (!cartItem) return;
+
+            const newQuantity = cartItem.quantity + change;
+            
+            if (newQuantity <= 0) {
+                removeFromCart(productId);
+                return;
+            }
+
+            if (newQuantity > product.stock) {
+                alert(state.currentLang === 'ar' ? 'المخزون غير كافٍ' : 'Insufficient stock');
+                return;
+            }
+
+            cartItem.quantity = newQuantity;
+            // persist
+            state._carts = state._carts || {};
+            const username = state.currentUser?.username || '_guest';
+            state._carts[username] = state.cart;
+            saveToStorage(STORAGE_KEYS.CARTS, state._carts);
+
+            updateCartBadge();
+            renderCart();
+        }
+
+        function removeFromCart(productId) {
+            state.cart = state.cart.filter(item => item.productId !== productId);
+            state._carts = state._carts || {};
+            const username = state.currentUser?.username || '_guest';
+            state._carts[username] = state.cart;
+            saveToStorage(STORAGE_KEYS.CARTS, state._carts);
+            updateCartBadge();
+            renderCart();
+        }
+
+        function goToCheckout() {
+            showSection('checkoutSection');
+            renderCheckout();
+        }
+
+        function editProduct(productId) {
+            const product = state.products.find(p => p.id === productId);
+            if (!product) return;
+
+            document.getElementById('productId').value = product.id;
+            document.getElementById('productName').value = product.name;
+            document.getElementById('productNameAr').value = product.nameAr;
+            document.getElementById('productDesc').value = product.description;
+            document.getElementById('productDescAr').value = product.descriptionAr;
+            document.getElementById('productCategory').value = product.category;
+            document.getElementById('productPrice').value = product.price;
+            document.getElementById('productCost').value = product.cost;
+            document.getElementById('productStock').value = product.stock;
+            document.getElementById('productImage').value = product.image;
+
+            document.getElementById('productModal').classList.add('active');
+        }
+
+        function deleteProduct(productId) {
+            if (confirm(state.currentLang === 'ar' ? 'هل أنت متأكد من الحذف؟' : 'Are you sure you want to delete?')) {
+                state.products = state.products.filter(p => p.id !== productId);
+                persistAll();
+                renderProductsTable();
+                renderProducts();
+            }
+        }
+
+        // ============= EVENT LISTENERS =============
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load persisted data (users, products, orders, carts, session, lang)
+            loadAll();
+
+            // If no persisted products/users exist, persist initial sample data
+            const persistedProducts = loadFromStorage(STORAGE_KEYS.PRODUCTS, null);
+            if (!persistedProducts || persistedProducts.length === 0) {
+                persistAll();
+            }
+
+            // If a session exists load the user's cart (or guest cart)
+            const sessionUser = state.currentUser?.username;
+            if (sessionUser) {
+                state.cart = state._carts[sessionUser] || [];
+            } else {
+                state.cart = state._carts['_guest'] || [];
+            }
+            updateCartBadge();
+            // Language toggle
+            document.getElementById('languageToggle').addEventListener('click', toggleLanguage);
+
+            // Auth form switches
+            document.getElementById('showRegister').addEventListener('click', () => {
+                showSection('registerSection');
+            });
+
+            document.getElementById('showLogin').addEventListener('click', () => {
+                showSection('loginSection');
+            });
+
+            // Login form
+            document.getElementById('loginForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const username = document.getElementById('loginUsername').value;
+                const password = document.getElementById('loginPassword').value;
+
+                const user = state.users.find(u => u.username === username && u.password === password);
+
+                if (user) {
+                    state.currentUser = user;
+                    // Load user's cart if any
+                    state.cart = state._carts[user.username] || [];
+                    saveToStorage(STORAGE_KEYS.SESSION, state.currentUser);
+                    updateCartBadge();
+                    document.getElementById('loginError').textContent = '';
+                    updateUIForUser();
+                } else {
+                    document.getElementById('loginError').textContent = 
+                        state.currentLang === 'ar' ? 'بيانات دخول خاطئة' : 'Invalid credentials';
+                }
+            });
+
+            // Register form
+            document.getElementById('registerForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const username = document.getElementById('registerUsername').value;
+                const password = document.getElementById('registerPassword').value;
+                const email = document.getElementById('registerEmail').value;
+                const phone = document.getElementById('registerPhone').value;
+
+                if (state.users.find(u => u.username === username)) {
+                    document.getElementById('registerError').textContent = 
+                        state.currentLang === 'ar' ? 'اسم المستخدم موجود بالفعل' : 'Username already exists';
+                    return;
+                }
+
+                state.users.push({
+                    username,
+                    password,
+                    email,
+                    phone,
+                    role: 'customer'
+                });
+
+                // Persist new users
+                persistAll();
+
+                document.getElementById('registerSuccess').textContent = 
+                    state.currentLang === 'ar' ? 'تم التسجيل بنجاح! يمكنك تسجيل الدخول الآن' : 
+                    'Registration successful! You can now login';
+                document.getElementById('registerError').textContent = '';
+                
+                setTimeout(() => {
+                    showSection('loginSection');
+                }, 1200);
+            });
+
+            // Logout
+            document.getElementById('logoutBtn').addEventListener('click', () => {
+                // Save current user's cart before logging out
+                const username = state.currentUser?.username;
+                if (username) {
+                    state._carts = state._carts || {};
+                    state._carts[username] = state.cart || [];
+                }
+
+                // Clear session and cart
+                state.currentUser = null;
+                state.cart = [];
+                saveToStorage(STORAGE_KEYS.CARTS, state._carts);
+                saveToStorage(STORAGE_KEYS.SESSION, null);
+                updateCartBadge();
+                updateUIForUser();
+            });
+
+            // Navigation buttons
+            document.getElementById('cartBtn').addEventListener('click', () => {
+                showSection('cartSection');
+                renderCart();
+            });
+
+            document.getElementById('ordersBtn').addEventListener('click', () => {
+                showSection('ordersSection');
+                renderMyOrders();
+            });
+
+            document.getElementById('dashboardBtn').addEventListener('click', () => {
+                showSection('adminSection');
+                renderAdminDashboard();
+            });
+
+            // Search and filter
+            document.getElementById('searchInput').addEventListener('input', renderProducts);
+            document.getElementById('categoryFilter').addEventListener('change', renderProducts);
+
+            // Checkout form
+            document.getElementById('checkoutForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const order = {
+                    id: generateOrderId(),
+                    userId: state.currentUser.username,
+                    customerName: document.getElementById('checkoutName').value,
+                    phone: document.getElementById('checkoutPhone').value,
+                    address: document.getElementById('checkoutAddress').value,
+                    paymentMethod: document.getElementById('checkoutPayment').value,
+                    items: [...state.cart],
+                    total: state.cart.reduce((sum, item) => {
+                        const product = state.products.find(p => p.id === item.productId);
+                        return sum + (product.price * item.quantity);
+                    }, 0),
+                    date: new Date().toISOString(),
+                    status: 'Completed'
+                };
+
+                // Update product stock and sold count
+                state.cart.forEach(item => {
+                    const product = state.products.find(p => p.id === item.productId);
+                    if (product) {
+                        product.stock -= item.quantity;
+                        product.sold += item.quantity;
+                    }
+                });
+
+                state.orders.push(order);
+
+                // Persist orders and products
+                persistAll();
+
+                // Clear user's cart and persist
+                const username = state.currentUser?.username || '_guest';
+                state._carts = state._carts || {};
+                state._carts[username] = [];
+                state.cart = [];
+                saveToStorage(STORAGE_KEYS.CARTS, state._carts);
+                updateCartBadge();
+
+                document.getElementById('orderIdDisplay').textContent = `${t('orderId')}: ${order.id}`;
+                showSection('orderSuccessSection');
+            });
+
+            // Continue shopping
+            document.getElementById('continueShoppingBtn').addEventListener('click', () => {
+                showSection('productsSection');
+                renderProducts();
+            });
+
+            // Admin tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+
+                    const tabName = tab.getAttribute('data-tab');
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.classList.add('hidden');
+                    });
+                    document.getElementById(tabName + 'Content').classList.remove('hidden');
+
+                    if (tabName === 'analytics') {
+                        setTimeout(renderCharts, 100);
+                    }
+                });
+            });
+
+            // Add product button
+            document.getElementById('addProductBtn').addEventListener('click', () => {
+                document.getElementById('productForm').reset();
+                document.getElementById('productId').value = '';
+                document.getElementById('productModal').classList.add('active');
+            });
+
+            // Close modal
+            document.getElementById('closeProductModal').addEventListener('click', () => {
+                document.getElementById('productModal').classList.remove('active');
+            });
+
+            // Product form
+            document.getElementById('productForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+
+                const productId = document.getElementById('productId').value;
+                const productData = {
+                    name: document.getElementById('productName').value,
+                    nameAr: document.getElementById('productNameAr').value,
+                    description: document.getElementById('productDesc').value,
+                    descriptionAr: document.getElementById('productDescAr').value,
+                    category: document.getElementById('productCategory').value,
+                    price: parseFloat(document.getElementById('productPrice').value),
+                    cost: parseFloat(document.getElementById('productCost').value),
+                    stock: parseInt(document.getElementById('productStock').value),
+                    image: document.getElementById('productImage').value
+                };
+
+                if (productId) {
+                    // Edit existing product
+                    const product = state.products.find(p => p.id === parseInt(productId));
+                    Object.assign(product, productData);
+                } else {
+                    // Add new product
+                    const newId = Math.max(...state.products.map(p => p.id), 0) + 1;
+                    state.products.push({
+                        id: newId,
+                        ...productData,
+                        sold: 0
+                    });
+                }
+
+                document.getElementById('productModal').classList.remove('active');
+                // persist products and update UI
+                persistAll();
+                renderProductsTable();
+                renderProducts();
+            });
+
+            // Initialize
+            updateAllTexts();
+            updateUIForUser();
+        });
+
+        // Make functions global for onclick handlers
+        window.addToCart = addToCart;
+        window.updateCartQuantity = updateCartQuantity;
+        window.removeFromCart = removeFromCart;
+        window.goToCheckout = goToCheckout;
+        window.editProduct = editProduct;
+        window.deleteProduct = deleteProduct;
+    </script>
+</body>
+</html>
